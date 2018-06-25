@@ -25,70 +25,51 @@ class udpServer
         $udp_worker->onMessage = function ($udp_connection, $data) {
             global $sender_io;
             // global $con;
-
-            $data = json_decode($data);
-            $post_data = array(
-                'access_token' => $data->token
-            );
-            $post_data = json_encode($post_data);
-            echo 'post_data:'.$post_data;
-            // $user_id = $this->http_request('../oauth2_server/resource.php?access_token='.$data->token);
-
-
-
-            $curl = curl_init();
-
-            curl_setopt_array($curl, array(
-              CURLOPT_URL => "https://yinrunxiang.cn/alexa/oauth2_server/resource.php?access_token=5798415f389fe03288149f4e67619de61c62967c",
-              CURLOPT_RETURNTRANSFER => true,
-              CURLOPT_ENCODING => "",
-              CURLOPT_MAXREDIRS => 10,
-              CURLOPT_TIMEOUT => 30,
-              CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-              CURLOPT_CUSTOMREQUEST => "POST",
-              CURLOPT_POSTFIELDS => "",
-              CURLOPT_HTTPHEADER => array(
-                "cache-control: no-cache",
-                "content-type: application/x-www-form-urlencoded",
-                "postman-token: 1ca12502-b01d-3585-62ad-4fbaa983deda"
-              ),
-            ));
-            
-            $response = curl_exec($curl);
-            $err = curl_error($curl);
-            
-            curl_close($curl);
-            
-            if ($err) {
-              echo "cURL Error #:" . $err;
-            } else {
-              echo $response;
-            }
-
-            // echo 'user_id:'.$user_id;
-            // $alexa = ["intent" => $data->intent, "user_id" => $user_id];
-            // var_dump($alexa);
-            // $sender_io->emit('alexa', $alexa);
+            $data = json_decode($data, true);
+            $token = $this->http_request('localhost/alexa/oauth2_server/resource.php?access_token='.$data['token']);
+            $alexa = ["intent" => $data['intent'], "token" => $token];
+            $sender_io->emit('alexa', $alexa);
         };
             // 执行监听
         $udp_worker->listen();
     }
 
-    // public function http_request($url, $data = null)
-    // {
-    //     $curl = curl_init();
-    //     curl_setopt($curl, CURLOPT_URL, $url);
-    //     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-    //     curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-    //     if (!empty($data)) {
-    //         curl_setopt($curl, CURLOPT_POST, 1);
-    //         curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-    //     }
-    //     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    //     $output = curl_exec($curl);
-    //     curl_close($curl);
-    //     return $output;
-    // }
+    public function http_request($url, $data = null)
+    {
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+        if (!empty($data)) {
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+        }
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        // curl_setopt_array($curl, array(
+        //     CURLOPT_URL => $url,
+        //     CURLOPT_RETURNTRANSFER => true,
+        //     CURLOPT_ENCODING => "",
+        //     CURLOPT_MAXREDIRS => 10,
+        //     CURLOPT_TIMEOUT => 30,
+        //     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        //     CURLOPT_CUSTOMREQUEST => "POST",
+        //     CURLOPT_POSTFIELDS => "",
+        //     CURLOPT_HTTPHEADER => array(
+        //       "cache-control: no-cache",
+        //       "content-type: application/x-www-form-urlencoded",
+        //     ),
+        //   ));
+          $response = curl_exec($curl);
+          $err = curl_error($curl);
+          
+          curl_close($curl);
+          
+          if ($err) {
+            return "cURL Error #:" . $err;
+          } else {
+            return $response;
+          }
+    }
 
     // public function send_post($url, $data)
     // {
