@@ -26,8 +26,9 @@ class udpServer
             global $sender_io;
             // global $con;
             $data = json_decode($data, true);
+            var_dump($data);
             $token = $this->http_request('localhost/alexa/oauth2_server/resource.php?access_token='.$data['token']);
-            $alexa = ["intent" => $data['intent'], "token" => $token];
+            $alexa = ["intent" => $data['intent'],"device" => $data['device'], "token" => $token];
             $sender_io->emit('alexa', $alexa);
         };
             // 执行监听
